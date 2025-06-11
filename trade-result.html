@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trade Result</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+
+    .profit {
+      color: green;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .loss {
+      color: red;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .header {
+      background-color: #007BFF;
+      padding: 15px;
+      color: white;
+    }
+
+    .card {
+      margin: 40px auto;
+      padding: 25px;
+      border-radius: 10px;
+      background: #f1f1f1;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 30px;
+    }
+
+    #close-btn {
+      background-color: #28a745;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1><span class="brand">Eagle</span> <span class="highlight">Trading</span></h1>
+  </div>
+
+  <div class="card">
+    <h2 id="market-name">Market</h2>
+    <p id="result">Loading live index...</p>
+    <button id="close-btn" class="btn">Close Trade</button><br>
+    <a href="index.html" class="btn">Back to Dashboard</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const market = params.get("market");
+    const amount = parseInt(params.get("amount")) || 100;
+
+    document.getElementById("market-name").innerText = "Market: " + market;
+
+    const resultElement = document.getElementById("result");
+    const closeBtn = document.getElementById("close-btn");
+
+    let currentValue = 0;
+    let isProfit = Math.random() < 0.5;
+    let direction = isProfit ? 1 : -1;
+    let label = isProfit ? "Profit: ₹" : "Loss: ₹";
+    let cssClass = isProfit ? "profit" : "loss";
+
+    // Live index animation
+    const interval = setInterval(() => {
+      const change = Math.floor(Math.random() * 3) + 1;
+      currentValue += direction * change;
+
+      // Clamp values between 0 and amount
+      if (currentValue > amount) currentValue = amount;
+      if (currentValue < 0) currentValue = 0;
+
+      resultElement.innerText = label + Math.abs(currentValue);
+      resultElement.className = cssClass;
+    }, 150);
+
+    // Close Trade button click
+    closeBtn.addEventListener("click", () => {
+      clearInterval(interval);
+
+      // Finalize and show result
+      resultElement.innerText = label + Math.abs(currentValue);
+      resultElement.className = cssClass;
+
+      // Update balance
+      let balance = parseInt(localStorage.getItem("balance")) || 0;
+      if (direction === 1) {
+        balance += currentValue;
+      } else {
+        balance -= currentValue;
+        if (balance < 0) balance = 0;
+      }
+      localStorage.setItem("balance", balance);
+
+      // Save to trade history
+      let trades = JSON.parse(localStorage.getItem("trades")) || [];
+      trades.push({
+        market: market,
+        result: direction * currentValue
+      });
+      localStorage.setItem("trades", JSON.stringify(trades));
+
+      // Disable button
+      closeBtn.disabled = true;
+      closeBtn.innerText = "Trade Closed";
+    });
+  </script>
+
+</body>
+</html>
+      
+      // Save this trade as live
+let liveTrades = JSON.parse(localStorage.getItem("liveTrades")) || [];
+liveTrades.push({ market: selectedMarket, amount: 100 }); // or dynamic amount
+localStorage.setItem("liveTrades", JSON.stringify(liveTrades));
+      
+      // Remove this market from live trades
+let live = JSON.parse(localStorage.getItem("liveTrades")) || [];
+live = live.filter(tr => tr.market !== market);
+localStorage.setItem("liveTrades", JSON.stringify(live));
