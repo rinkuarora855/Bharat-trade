@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Withdraw</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f2f2f2;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: 20px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .history {
+      margin-top: 20px;
+    }
+    .item {
+      background: #e9ecef;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+    .back-button {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .back-button a {
+      text-decoration: none;
+      color: #007BFF;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Withdraw Money</h2>
+
+  <div class="card">
+    <input type="number" id="amount" placeholder="Enter Withdraw Amount (₹)">
+    <input type="text" id="mobile" placeholder="Enter Mobile Number">
+    
+    <select id="method">
+      <option value="" disabled selected>Select UPI Method</option>
+      <option value="PhonePe">PhonePe</option>
+      <option value="GPay">GPay</option>
+      <option value="Paytm">Paytm</option>
+    </select>
+    
+    <button onclick="submitWithdraw()">Submit Withdraw</button>
+    
+    <div class="history">
+      <h3>Your Withdraw Requests</h3>
+      <div id="withdraw-list">Loading...</div>
+    </div>
+  </div>
+
+  <div class="back-button">
+    <a href="index.html">← Back to Home</a>
+  </div>
+
+  <script>
+    function submitWithdraw() {
+      const amount = parseInt(document.getElementById('amount').value.trim());
+      const mobile = document.getElementById('mobile').value.trim();
+      const method = document.getElementById('method').value;
+      let balance = parseInt(localStorage.getItem("balance") || "0");
+
+      if (!amount || !mobile || !method) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      if (amount < 10) {
+        alert("Minimum withdraw amount is ₹10.");
+        return;
+      }
+
+      if (amount > balance) {
+        alert("Withdraw amount exceeds available balance.");
+        return;
+      }
+
+      const withdraw = {
+        mobile: mobile,
+        method: method,
+        amount: amount,
+        date: new Date().toLocaleString()
+      };
+
+      // Save withdrawal history
+      let withdraws = JSON.parse(localStorage.getItem("withdraws")) || [];
+      withdraws.push(withdraw);
+      localStorage.setItem("withdraws", JSON.stringify(withdraws));
+
+      // Update balance
+      localStorage.setItem("balance", (balance - amount).toString());
+
+      alert("Withdraw request submitted!");
+      showWithdraws();
+    }
+
+    function showWithdraws() {
+      const data = JSON.parse(localStorage.getItem("withdraws")) || [];
+      const list = document.getElementById("withdraw-list");
+      
+      if (data.length === 0) {
+        list.innerHTML = "<p>No withdraw requests yet.</p>";
+        return;
+      }
+
+      list.innerHTML = "";
+      data.reverse().forEach(item => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <strong>₹${item.amount}</strong> via ${item.method}<br>
+          Mobile: ${item.mobile}<br>
+          <small>${item.date}</small>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    showWithdraws();
+  </script>
+
+</body>
+</html>
