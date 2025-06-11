@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+    }.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-box, .dashboard {
+  background-color: #ffffff10;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  width: 95%;
+  max-width: 450px;
+}
+
+.login-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+input[type="password"], input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  background-color: #00c6ff;
+  color: white;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.button:hover {
+  background-color: #007bff;
+}
+
+.hidden { display: none; }
+
+.card {
+  background: #ffffff15;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.card h2 {
+  margin-bottom: 10px;
+}
+
+.stat {
+  margin: 5px 0;
+}
+
+#indexList li {
+  background-color: #ffffff30;
+  padding: 5px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  list-style: none;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="login-box" id="loginBox">
+      <h2>Admin Login</h2>
+      <input type="password" id="adminPass" placeholder="Enter Admin Password">
+      <button class="button" onclick="loginAdmin()">Login</button>
+      <p id="errorMsg" style="color: #ff4d4d; text-align: center;"></p>
+    </div><div class="dashboard hidden" id="adminPanel">
+  <h1 style="text-align:center; color: #00c6ff;">Admin Dashboard</h1>
+
+  <div class="card">
+    <h2>Dashboard Overview</h2>
+    <div class="stat">Total Users: <span id="userCount">0</span></div>
+    <div class="stat">Total Trades: <span id="tradeCount">0</span></div>
+    <div class="stat">Total Trade Amount: <span id="tradeAmount">₹0</span></div>
+    <div class="stat">Total Profit/Loss: <span id="totalProfit">₹0</span></div>
+    <div class="stat">Withdraw Requests: <span id="withdrawCount">0</span></div>
+    <div class="stat">Approved Withdrawals: <span id="approvedAmount">₹0</span></div>
+  </div>
+
+  <div class="card index-list">
+    <h2>Trading Indexes</h2>
+    <ul id="indexList"></ul>
+    <input type="text" id="newIndex" placeholder="Add New Index">
+    <button class="button" onclick="addIndex()">Add Index</button>
+  </div>
+
+  <div class="card user-list">
+    <h2>Registered Users</h2>
+    <div id="userList">Loading...</div>
+  </div>
+
+  <div class="card withdraw-list">
+    <h2>Withdraw Requests</h2>
+    <div id="withdrawList">Loading...</div>
+  </div>
+</div>
+
+  </div><script>
+  const ADMIN_PASSWORD = "1234";
+
+  function loginAdmin() {
+    const pass = document.getElementById("adminPass").value;
+    if (pass === ADMIN_PASSWORD) {
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("adminPanel").classList.remove("hidden");
+      initDashboard();
+    } else {
+      document.getElementById("errorMsg").textContent = "Incorrect password!";
+    }
+  }
+
+  function initDashboard() {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const trades = JSON.parse(localStorage.getItem("trades")) || [];
+    const withdraws = JSON.parse(localStorage.getItem("withdraws")) || [];
+    const indexes = JSON.parse(localStorage.getItem("indexes")) || ["Nifty", "BankNifty"];
+
+    document.getElementById("userCount").textContent = users.length;
+    document.getElementById("tradeCount").textContent = trades.length;
+    const tradeAmount = trades.reduce((sum, t) => sum + t.amount, 0);
+    const tradeProfit = trades.reduce((sum, t) => sum + (t.result || 0), 0);
+    document.getElementById("tradeAmount").textContent = `₹${tradeAmount}`;
+    document.getElementById("totalProfit").textContent = `₹${tradeProfit}`;
+    document.getElementById("withdrawCount").textContent = withdraws.length;
+    const approved = withdraws.filter(w => w.status === "approved").reduce((sum, w) => sum + w.amount, 0);
+    document.getElementById("approvedAmount").textContent = `₹${approved}`;
+
+    const indexList = document.getElementById("indexList");
+    indexList.innerHTML = "";
+    indexes.forEach(index => {
+      const li = document.createElement("li");
+      li.textContent = index;
+      indexList.appendChild(li);
+    });
+
+    const userList = document.getElementById("userList");
+    userList.innerHTML = "";
+    users.forEach(user => {
+      const div = document.createElement("div");
+      div.innerHTML = `<strong>${user.name}</strong> - Balance: ₹${user.balance || 0}, Profit: ₹${user.profit || 0}, Loss: ₹${user.loss || 0}`;
+      userList.appendChild(div);
+    });
+
+    const withdrawList = document.getElementById("withdrawList");
+    withdrawList.innerHTML = "";
+    withdraws.forEach(w => {
+      const div = document.createElement("div");
+      div.innerHTML = `₹${w.amount} - ${w.method} - ${w.mobile} - ${w.status || "Pending"}`;
+      withdrawList.appendChild(div);
+    });
+  }
+
+  function addIndex() {
+    const newIndex = document.getElementById("newIndex").value.trim();
+    if (!newIndex) return;
+    let indexes = JSON.parse(localStorage.getItem("indexes")) || [];
+    indexes.push(newIndex);
+    localStorage.setItem("indexes", JSON.stringify(indexes));
+    document.getElementById("newIndex").value = "";
+    initDashboard();
+  }
+</script></body>
+</html>

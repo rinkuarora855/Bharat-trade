@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eagle Trading</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<script>
+  function loadBalance() {
+    let balance = localStorage.getItem("walletBalance") || 0;
+    document.getElementById("wallet-balance").innerText = balance;
+  }
+
+  function refreshBalance() {
+    loadBalance();
+    alert("Balance refreshed!");
+  }
+
+  // Load balance on page load
+  window.onload = loadBalance;
+</script>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const amount = urlParams.get('amount') || 0;
+  console.log("Selected trade amount: ₹" + amount); // Optional: Use it for backend or validation
+</script>
+
+<body>
+  <div class="header">
+    <img src="https://eagletrade.in/logo.png" alt="Logo" class="logo" />
+    <h1><span class="brand">Eagle</span> <span class="highlight">Trading</span></h1>
+  </div>
+
+  <div class="card">
+    <h2>Your Wallet</h2>
+<p>Balance: ₹<span id="wallet-balance">0</span> 
+  <button onclick="refreshBalance()">🔄</button>
+</p>
+    <a href="add-money.html" class="btn">Add Money</a>
+
+  <div class="card">
+    <h2>Choose Trading Amount</h2>
+    <p>Select an amount to Trade:</p>
+    <div class="btn-group">
+      <!-- Inside the “Choose Trading Amount” section -->
+<a href="select-market.html" class="btn">Trade ₹100</a>
+<a href="select-market.html" class="btn">Trade ₹250</a>
+<a href="select-market.html" class="btn">Trade ₹500</a>
+<a href="select-market.html" class="btn">Trade ₹800</a>
+      <a href="select-market.html?amount=100" class="btn">Trade ₹100</a>
+    </div>
+  </div>
+
+  <div class="card">
+<h3>Your Portfolio</h3>
+<div id="live-trades">
+  <h4>Live Trades</h4>
+  <div id="live-list">No live trades.</div>
+</div>
+
+<div id="closed-trades">
+  <h4>Closed Trades</h4>
+  <div id="portfolio-list">Loading closed trades...</div>
+</div>
+</div>
+  </div>
+
+  <div class="card">
+    <h2>Withdrawal Request</h2>
+    <a href="withdraw.html">
+    <button class="btn">Withdrawal</button> </a>
+    <p>Instant Withdrawal 24x7</p>
+   
+
+    
+  </div>
+</body> 
+  <script>
+  function addMoney(amount) {
+    // Simulate successful payment
+    let currentBalance = localStorage.getItem("walletBalance") || 0;
+    currentBalance = parseInt(currentBalance) + amount;
+    localStorage.setItem("walletBalance", currentBalance);
+
+    alert("₹" + amount + " added successfully!");
+    window.location.href = "index.html"; // Go back to dashboard
+  }
+</script>
+</html>
+  
+  <p>Your Balance: ₹<span id="wallet-balance">0</span></p>
+
+<script>
+  // Show balance from localStorage
+  const bal = localStorage.getItem("balance") || 0;
+  document.getElementById("wallet-balance").innerText = bal;
+</script>
+  
+  <script>
+  // Show wallet balance
+  const bal = localStorage.getItem("balance") || 0;
+  document.getElementById("wallet-balance").innerText = bal;
+
+  // Load portfolio
+  const trades = JSON.parse(localStorage.getItem("trades")) || [];
+  const list = document.getElementById("portfolio-list");
+
+  if (trades.length === 0) {
+    list.innerHTML = "<p>No trades yet.</p>";
+  } else {
+    list.innerHTML = "";
+    trades.reverse().forEach(trade => {
+      const div = document.createElement("div");
+      div.style.marginBottom = "10px";
+      div.style.padding = "10px";
+      div.style.border = "1px solid #ccc";
+      div.style.borderRadius = "5px";
+      div.style.background = "#f9f9f9";
+      div.innerHTML = `
+        <strong>${trade.market}</strong><br>
+        <span style="color: ${trade.result > 0 ? 'green' : 'red'};">
+          ${trade.result > 0 ? 'Profit' : 'Loss'}: ₹${Math.abs(trade.result)}
+        </span>
+      `;
+      list.appendChild(div);
+    });
+  }
+</script>
+<script>
+  // Wallet
+  const bal = localStorage.getItem("balance") || 0;
+  document.getElementById("wallet-balance").innerText = bal;
+
+  // Closed Trades
+  const trades = JSON.parse(localStorage.getItem("trades")) || [];
+  const list = document.getElementById("portfolio-list");
+
+  if (trades.length === 0) {
+    list.innerHTML = "<p>No closed trades yet.</p>";
+  } else {
+    list.innerHTML = "";
+    trades.reverse().forEach(trade => {
+      const div = document.createElement("div");
+      div.style.marginBottom = "10px";
+      div.style.padding = "10px";
+      div.style.border = "1px solid #ccc";
+      div.style.borderRadius = "5px";
+      div.style.background = "#f9f9f9";
+      div.innerHTML = `
+        <strong>${trade.market}</strong><br>
+        <span style="color: ${trade.result > 0 ? 'green' : 'red'};">
+          ${trade.result > 0 ? 'Profit' : 'Loss'}: ₹${Math.abs(trade.result)}
+        </span>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  // Live Trades
+  const liveTrades = JSON.parse(localStorage.getItem("liveTrades")) || [];
+  const liveList = document.getElementById("live-list");
+
+  if (liveTrades.length === 0) {
+    liveList.innerHTML = "<p>No live trades right now.</p>";
+  } else {
+    liveList.innerHTML = "";
+    liveTrades.forEach(trade => {
+      const div = document.createElement("div");
+      div.style.marginBottom = "10px";
+      div.style.padding = "10px";
+      div.style.border = "1px dashed #aaa";
+      div.style.borderRadius = "5px";
+      div.style.background = "#fff";
+      div.innerHTML = `
+        <strong>${trade.market}</strong><br>
+        <span style="color: blue;">
+          Live: ₹${trade.amount} running...
+        </span>
+      `;
+      liveList.appendChild(div);
+    });
+  }
+</script>
